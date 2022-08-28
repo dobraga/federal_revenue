@@ -4,16 +4,24 @@ import (
 	"os"
 )
 
-func CheckFile(filename string, filesize int64) (*os.File, bool, error) {
+func CheckFile(filename string, filesize int) bool {
 	stat, err := os.Stat(filename)
 	if err == nil {
-		if stat.Size() == filesize {
-			return &os.File{}, true, nil
+		if stat.Size() == int64(filesize) {
+			return true
 		}
 	}
-
 	os.Remove(filename)
-	out, err := os.Create(filename)
 
+	return false
+}
+
+func CheckFileCreate(filename string, filesize int) (*os.File, bool, error) {
+	valid_size := CheckFile(filename, filesize)
+	if valid_size {
+		return &os.File{}, true, nil
+	}
+
+	out, err := os.Create(filename)
 	return out, false, err
 }

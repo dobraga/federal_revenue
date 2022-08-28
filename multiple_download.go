@@ -6,9 +6,10 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func Downloads(urls []string) error {
+func Downloads(urls []string) []error {
 	wg := new(sync.WaitGroup)
 	errors := make(chan error, len(urls))
+	all_errors := []error{}
 
 	for _, url := range urls {
 		wg.Add(1)
@@ -29,9 +30,8 @@ func Downloads(urls []string) error {
 	close(errors)
 
 	for err := range errors {
-		return err
+		all_errors = append(all_errors, err)
 	}
 
-	return nil
-
+	return all_errors
 }

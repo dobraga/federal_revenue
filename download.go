@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 	"strconv"
 	"strings"
 	"sync"
@@ -14,37 +13,40 @@ import (
 )
 
 var semaphore = make(chan int, MAX_GOROUTINES)
+var client = http.Client{
+	Timeout: REQUEST_TIMEOUT_MINUTES * time.Minute,
+}
 
 func Download(url string) error {
 	tini := time.Now()
 
+	// Create filename
 	filename := get_filename_from_url(url)
 	output := PATH + "/" + filename
 
-	_, err := os.Stat(output)
-	if err == nil {
-		log.Infof("File '%s' already downloaded", output)
+	// Get file size and define chunks to download
+	filesize, err := file_size(client, url)
+	if err != nil {
+		return err
+	}
+	chunks := range_(0, filesize, CHUNK_SIZE)
+
+	// Check file already downloaded
+	ok := CheckFile(output, filesize)
+	if ok {
+		log.Debugf(fmt.Sprintf("Already downloaded '%s'", url))
 		return nil
 	}
+	log.Infof("Downloading '%s' %d bytes in %d parts", url, filesize, len(chunks))
 
-	client := http.Client{
-		Timeout: 60 * time.Minute,
-	}
-
-	size, err := file_size(client, url)
-	if err != nil {
-		return err
-	}
-
-	chunks := Range(0, size, CHUNK_SIZE)
-
-	log.Infof("Downloading '%s' %d bytes in %d parts", url, size, len(chunks))
-
+	// Concurrent download
 	err = concurrent_download(client, url, filename, chunks)
 	if err != nil {
+		log.Errorf("Error downloading '%s'", url)
 		return err
 	}
 
+	// Merge parts of file
 	files := []string{}
 	for i := range chunks {
 		files = append(files, fmt.Sprintf("%s/%s.part%d", PATH_TEMP, filename, i))
@@ -70,11 +72,10 @@ func concurrent_download(c http.Client, u, o string, chunks [][2]int) error {
 		wg.Add(1)
 		semaphore <- 1
 
-		go func(
-			c http.Client, u, o string, i int, chunk [2]int, w *sync.WaitGroup) {
+		go func(c http.Client, u, o string, i int, chunk [2]int, w *sync.WaitGroup) {
 			defer w.Done()
 
-			err := retry_download_range(c, u, o, i, chunk[0], chunk[1], 10)
+			err := retry_download_range(c, u, o, i, chunk[0], chunk[1], MAX_RETRY)
 			<-semaphore
 			if err != nil {
 				log.Error(err)
@@ -116,7 +117,7 @@ func retry_download_range(client http.Client, url, filename string, part, ini, e
 			return nil
 		}
 
-		log.Warnf("Error fetching '%s' part %d in %d attempt: %v", url, part, i, err)
+		log.Warnf("Error fetching '%s' part %d in %d attempt error: %v", url, part, i, err)
 	}
 
 	return err
@@ -124,12 +125,11 @@ func retry_download_range(client http.Client, url, filename string, part, ini, e
 
 func download_range(client http.Client, url, filename string, part, ini, end int) error {
 	tini := time.Now()
-	filesize := int64(end - ini + 1)
+	filesize := end - ini + 1
 
-	// Create the file
+	// Check file exists or Create the file
 	file := fmt.Sprintf("%s/%s.part%d", PATH_TEMP, filename, part)
-
-	out, ok, err := CheckFile(file, filesize)
+	out, ok, err := CheckFileCreate(file, filesize)
 	if ok {
 		log.Debugf(fmt.Sprintf("Already downloaded '%s' part %d", url, part))
 		return nil
@@ -172,4 +172,21 @@ func get_filename_from_url(url string) string {
 	split := strings.Split(url, "/")
 	filename := split[len(split)-1]
 	return filename
+}
+
+func range_(ini, end, step int) [][2]int {
+	r := [][2]int{}
+	i := 0
+
+	for i < end {
+		end_step := i + step - 1
+		if end_step > end {
+			end_step = end
+		}
+
+		r = append(r, [2]int{i, end_step})
+		i += step
+	}
+
+	return r
 }
