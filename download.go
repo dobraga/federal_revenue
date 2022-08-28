@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
@@ -22,7 +23,7 @@ func Download(url string) error {
 
 	// Create filename
 	filename := get_filename_from_url(url)
-	output := PATH + "/" + filename
+	output := filepath.Join(PATH, filename)
 
 	// Get file size and define chunks to download
 	filesize, err := file_size(client, url)
@@ -49,7 +50,7 @@ func Download(url string) error {
 	// Merge parts of file
 	files := []string{}
 	for i := range chunks {
-		files = append(files, fmt.Sprintf("%s/%s.part%d", PATH_TEMP, filename, i))
+		files = append(files, filepath.Join(PATH_TEMP, fmt.Sprintf("%s.part%d", filename, i)))
 	}
 
 	err = MergeParts(files, output)
@@ -128,7 +129,7 @@ func download_range(client http.Client, url, filename string, part, ini, end int
 	filesize := end - ini + 1
 
 	// Check file exists or Create the file
-	file := fmt.Sprintf("%s/%s.part%d", PATH_TEMP, filename, part)
+	file := filepath.Join(PATH_TEMP, fmt.Sprintf("%s.part%d", filename, part))
 	out, ok, err := CheckFileCreate(file, filesize)
 	if ok {
 		log.Debugf(fmt.Sprintf("Already downloaded '%s' part %d", url, part))
