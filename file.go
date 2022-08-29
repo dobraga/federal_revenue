@@ -12,19 +12,20 @@ import (
 )
 
 type File struct {
-	Url          string
-	Size         int
-	Chunks       [][2]int
-	UpdatedAtStr string
-	UpdatedAt    time.Time
-	Filename     string
-	LocalOutput  string
-	BucketOutput string
+	Url             string
+	Size            int
+	Chunks          [][2]int
+	UpdatedAtStr    string
+	UpdatedAt       time.Time
+	Filename        string
+	LocalOutput     string
+	LocalTempOutput string
+	BucketOutput    string
 }
 
 var time_layout = "2006-01-02 15:04"
 
-func (f *File) Defaults() error {
+func (f *File) Defaults(path, path_temp string) error {
 	// Set filename if not passed
 	if f.Filename == "" {
 		split := strings.Split(f.Url, "/")
@@ -39,14 +40,15 @@ func (f *File) Defaults() error {
 	f.UpdatedAt = updated
 
 	// Local and Bucket output path
-	f.LocalOutput = filepath.Join(PATH, f.Filename)
+	f.LocalOutput = filepath.Join(path, f.Filename)
+	f.LocalTempOutput = filepath.Join(path_temp, f.Filename)
 	f.BucketOutput = filepath.Join(updated.Format("200601"), f.Filename)
 
 	return nil
 }
 
 // Check already downloaded, Download and upload to storage
-func (f *File) Run() error {
+func (f *File) Run(chunk_size int) error {
 	uploaded := f.CheckUploaded()
 	downloaded := f.CheckDownloaded()
 
@@ -58,36 +60,32 @@ func (f *File) Run() error {
 			return nil
 		} else {
 			// Not downloaded
-			err := Storage.Download(f.BucketOutput, f.LocalOutput)
-			return err
+			return Storage.Download(f.BucketOutput, f.LocalOutput)
 		}
 	}
 
 	if downloaded {
 		// Downloaded but not uploaded
-		err := Storage.Upload(f.LocalOutput, f.BucketOutput)
-		return err
+		return Storage.Upload(f.LocalOutput, f.BucketOutput)
 	}
 
 	// Not downloaded and not uploaded
-	err := f.Download(CHUNK_SIZE)
+	err := f.Download(chunk_size)
 	if err != nil {
 		return err
 	}
-	err = Storage.Upload(f.LocalOutput, f.BucketOutput)
-	return err
+	return Storage.Upload(f.LocalOutput, f.BucketOutput)
 }
 
 // Download to local file
 func (f *File) Download(chunk_size int) error {
 	tini := time.Now()
 
-	chunks := f.SetChunks(chunk_size)
-
-	logrus.Infof("Downloading '%s' to '%s' %d bytes in %d parts", f.Url, f.LocalOutput, f.Size, len(chunks))
+	f.SetChunks(chunk_size)
+	logrus.Infof("Downloading '%s' to '%s' %d bytes in %d parts", f.Url, f.LocalOutput, f.Size, len(f.Chunks))
 
 	// Concurrent download
-	err := ParallelDownload(HttpClient, f.Url, f.Filename, chunks)
+	err := ParallelDownload(HttpClient, f.Url, f.LocalTempOutput, f.Chunks)
 	if err != nil {
 		err = fmt.Errorf("error downloading '%s': %v", f.Url, err)
 		logrus.Error(err)
@@ -96,8 +94,8 @@ func (f *File) Download(chunk_size int) error {
 
 	// Merge parts of file
 	files := []string{}
-	for i := range chunks {
-		files = append(files, filepath.Join(PATH_TEMP, fmt.Sprintf("%s.part%d", f.Filename, i)))
+	for i := range f.Chunks {
+		files = append(files, fmt.Sprintf("%s.part%d", f.LocalTempOutput, i))
 	}
 
 	err = MergeParts(files, f.LocalOutput)

@@ -5,7 +5,6 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"path/filepath"
 	"sync"
 	"time"
 
@@ -30,7 +29,8 @@ func ParallelDownload(c http.Client, url, output string, chunks [][2]int) error 
 		go func(c http.Client, u, o string, i int, chunk [2]int, w *sync.WaitGroup) {
 			defer w.Done()
 
-			err := retry_download_range(c, u, o, i, chunk[0], chunk[1], MAX_RETRY)
+			part_file := fmt.Sprintf("%s.part%d", o, i)
+			err := retry_download_range(c, u, part_file, chunk[0], chunk[1], MAX_RETRY)
 			<-semaphore
 			if err != nil {
 				log.Error(err)
@@ -49,30 +49,29 @@ func ParallelDownload(c http.Client, url, output string, chunks [][2]int) error 
 	return nil
 }
 
-func retry_download_range(client http.Client, url, filename string, part, ini, end, retries int) error {
+func retry_download_range(client http.Client, url, filename string, ini, end, retries int) error {
 	var err error
 
 	for i := 0; i <= retries; i++ {
-		err = download_range(client, url, filename, part, ini, end)
+		err = download_range(client, url, filename, ini, end)
 		if err == nil {
 			return nil
 		}
-		err = fmt.Errorf("error fetching '%s' part %d in %d attempt error: %v", url, part, i, err)
+		err = fmt.Errorf("error fetching '%s' in %d attempt error: %v", filename, i, err)
 		log.Warn(err)
 	}
 
 	return err
 }
 
-func download_range(client http.Client, url, filename string, part, ini, end int) error {
+func download_range(client http.Client, url, filename string, ini, end int) error {
 	tini := time.Now()
 	filesize := end - ini + 1
 
 	// Check file exists or Create the file
-	file := filepath.Join(PATH_TEMP, fmt.Sprintf("%s.part%d", filename, part))
-	out, ok, err := checkFileCreate(file, filesize)
+	out, ok, err := checkFileCreate(filename, filesize)
 	if ok {
-		log.Debugf(fmt.Sprintf("Already downloaded '%s' part %d", url, part))
+		log.Debugf(fmt.Sprintf("Already downloaded '%s'", filename))
 		return nil
 	}
 	if err != nil {
@@ -81,7 +80,7 @@ func download_range(client http.Client, url, filename string, part, ini, end int
 	defer out.Close()
 
 	// Make a partial request
-	log.Debugf("Downloading part %d from '%s' with %d bytes", part, url, filesize)
+	log.Debugf("Downloading '%s' with %d bytes", filename, filesize)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return err
@@ -95,7 +94,7 @@ func download_range(client http.Client, url, filename string, part, ini, end int
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 206 {
-		return fmt.Errorf("partial request from '%s' part %d return status code %d", url, part, resp.StatusCode)
+		return fmt.Errorf("partial request '%s' return status code %d", filename, resp.StatusCode)
 	}
 
 	// Write the body to file
@@ -105,7 +104,7 @@ func download_range(client http.Client, url, filename string, part, ini, end int
 	}
 
 	timer := time.Since(tini).Minutes()
-	log.Debugf("Downloaded part %d from '%s' in %.2f minutes", part, url, timer)
+	log.Debugf("Downloaded part '%s' in %.2f minutes", filename, timer)
 	return nil
 }
 

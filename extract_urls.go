@@ -25,12 +25,7 @@ func ExtractUrls(url string) (Files, error) {
 		if strings.HasSuffix(name, ".zip") {
 			u := url + name
 			d := htmlquery.InnerText(dates[i])
-			f := File{Url: u, UpdatedAtStr: d}
-			err := f.Defaults()
-			if err != nil {
-				return Files{files}, err
-			}
-			files = append(files, f)
+			files = append(files, File{Url: u, UpdatedAtStr: d})
 		}
 	}
 

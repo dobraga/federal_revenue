@@ -23,15 +23,19 @@ const MAX_RETRY = 5
 func main() {
 	tini := time.Now()
 
+	err := os.MkdirAll(PATH_TEMP, 0777)
+	if err != nil {
+		panic(err)
+	}
+
 	files, err := ExtractUrls(URL)
 	if err != nil {
 		panic(err)
 	}
 
-	errs := files.Run()
+	errs := files.Run(PATH, PATH_TEMP, CHUNK_SIZE)
 	timer := time.Since(tini).Minutes()
 	if len(errs) == 0 {
-		os.RemoveAll(PATH_TEMP)
 		logrus.Infof("Downloaded %d files in %.2f minutes", files.Len(), timer)
 	} else {
 		logrus.Warnf("Downloaded %d(%d total) files with errors in %.2f minutes", len(errs), files.Len(), timer)
