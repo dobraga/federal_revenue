@@ -1,29 +1,34 @@
 package main
 
 import (
+	"os"
 	"sync"
 
 	log "github.com/sirupsen/logrus"
 )
 
-func Downloads(urls []string) []error {
+type Files struct {
+	f []File
+}
+
+func (fs *Files) Run() []error {
 	wg := new(sync.WaitGroup)
-	errors := make(chan error, len(urls))
+	errors := make(chan error, len(fs.f))
 	all_errors := []error{}
 
-	for _, url := range urls {
+	for _, file := range fs.f {
 		wg.Add(1)
 
-		go func(u string, w *sync.WaitGroup) {
+		go func(f File, w *sync.WaitGroup) {
 			defer w.Done()
 
-			err := Download(u)
+			err := f.Run()
 			if err != nil {
 				log.Error(err)
 				errors <- err
 			}
 
-		}(url, wg)
+		}(file, wg)
 	}
 
 	wg.Wait()
@@ -33,5 +38,13 @@ func Downloads(urls []string) []error {
 		all_errors = append(all_errors, err)
 	}
 
+	if len(errors) == 0 {
+		os.RemoveAll(PATH_TEMP)
+	}
+
 	return all_errors
+}
+
+func (fs *Files) Len() int {
+	return len(fs.f)
 }

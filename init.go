@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 
+	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
 )
 
@@ -19,4 +20,9 @@ func init() {
 		DisableLevelTruncation: true,
 	}
 	logrus.SetFormatter(formatter)
+
+	err = godotenv.Load()
+	if err != nil {
+		logrus.Fatal("Error loading .env file")
+	}
 }

@@ -18,13 +18,13 @@ func MergeParts(files []string, output string) error {
 	for _, file := range files {
 		o_file, err := os.Open(file)
 		if err != nil {
-			dest.Close()
+			o_file.Close()
 			os.Remove(output)
 			return err
 		}
 		bytes_writes, err := io.Copy(dest, o_file)
 		if err != nil {
-			dest.Close()
+			o_file.Close()
 			os.Remove(output)
 			return err
 		}

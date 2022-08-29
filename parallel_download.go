@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"path/filepath"
-	"strconv"
-	"strings"
 	"sync"
 	"time"
 
@@ -14,57 +13,12 @@ import (
 )
 
 var semaphore = make(chan int, MAX_GOROUTINES)
-var client = http.Client{
+var HttpClient = http.Client{
 	Timeout: REQUEST_TIMEOUT_MINUTES * time.Minute,
 }
 
-func Download(url string) error {
-	tini := time.Now()
-
-	// Create filename
-	filename := get_filename_from_url(url)
-	output := filepath.Join(PATH, filename)
-
-	// Get file size and define chunks to download
-	filesize, err := file_size(client, url)
-	if err != nil {
-		return err
-	}
-	chunks := range_(0, filesize, CHUNK_SIZE)
-
-	// Check file already downloaded
-	ok := CheckFile(output, filesize)
-	if ok {
-		log.Debugf(fmt.Sprintf("Already downloaded '%s'", url))
-		return nil
-	}
-	log.Infof("Downloading '%s' %d bytes in %d parts", url, filesize, len(chunks))
-
-	// Concurrent download
-	err = concurrent_download(client, url, filename, chunks)
-	if err != nil {
-		log.Errorf("Error downloading '%s'", url)
-		return err
-	}
-
-	// Merge parts of file
-	files := []string{}
-	for i := range chunks {
-		files = append(files, filepath.Join(PATH_TEMP, fmt.Sprintf("%s.part%d", filename, i)))
-	}
-
-	err = MergeParts(files, output)
-	if err != nil {
-		return err
-	}
-
-	timer := time.Since(tini).Minutes()
-	log.Infof("Downloaded '%s' to '%s' in %.2f minutes", url, output, timer)
-
-	return nil
-}
-
-func concurrent_download(c http.Client, u, o string, chunks [][2]int) error {
+// Download chunks in parallel
+func ParallelDownload(c http.Client, url, output string, chunks [][2]int) error {
 
 	wg := new(sync.WaitGroup)
 	errors := make(chan error, len(chunks))
@@ -82,7 +36,7 @@ func concurrent_download(c http.Client, u, o string, chunks [][2]int) error {
 				log.Error(err)
 				errors <- err
 			}
-		}(c, u, o, i, chunk, wg)
+		}(c, url, output, i, chunk, wg)
 	}
 
 	wg.Wait()
@@ -95,20 +49,6 @@ func concurrent_download(c http.Client, u, o string, chunks [][2]int) error {
 	return nil
 }
 
-func file_size(client http.Client, url string) (int, error) {
-	resp, err := client.Head(url)
-	if err != nil {
-		return 0, err
-	}
-
-	size, err := strconv.Atoi(resp.Header.Get("Content-Length"))
-	if err != nil {
-		return 0, err
-	}
-
-	return size, nil
-}
-
 func retry_download_range(client http.Client, url, filename string, part, ini, end, retries int) error {
 	var err error
 
@@ -117,8 +57,8 @@ func retry_download_range(client http.Client, url, filename string, part, ini, e
 		if err == nil {
 			return nil
 		}
-
-		log.Warnf("Error fetching '%s' part %d in %d attempt error: %v", url, part, i, err)
+		err = fmt.Errorf("error fetching '%s' part %d in %d attempt error: %v", url, part, i, err)
+		log.Warn(err)
 	}
 
 	return err
@@ -130,7 +70,7 @@ func download_range(client http.Client, url, filename string, part, ini, end int
 
 	// Check file exists or Create the file
 	file := filepath.Join(PATH_TEMP, fmt.Sprintf("%s.part%d", filename, part))
-	out, ok, err := CheckFileCreate(file, filesize)
+	out, ok, err := checkFileCreate(file, filesize)
 	if ok {
 		log.Debugf(fmt.Sprintf("Already downloaded '%s' part %d", url, part))
 		return nil
@@ -169,25 +109,13 @@ func download_range(client http.Client, url, filename string, part, ini, end int
 	return nil
 }
 
-func get_filename_from_url(url string) string {
-	split := strings.Split(url, "/")
-	filename := split[len(split)-1]
-	return filename
-}
-
-func range_(ini, end, step int) [][2]int {
-	r := [][2]int{}
-	i := 0
-
-	for i < end {
-		end_step := i + step - 1
-		if end_step > end {
-			end_step = end
+func checkFileCreate(filename string, filesize int) (*os.File, bool, error) {
+	stat, err := os.Stat(filename)
+	if err == nil {
+		if stat.Size() == int64(filesize) {
+			return &os.File{}, true, nil
 		}
-
-		r = append(r, [2]int{i, end_step})
-		i += step
 	}
-
-	return r
+	out, err := os.Create(filename)
+	return out, false, err
 }
