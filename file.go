@@ -25,7 +25,7 @@ type File struct {
 
 var time_layout = "2006-01-02 15:04"
 
-func (f *File) Defaults(path, path_temp string) error {
+func (f *File) Defaults(path, path_temp, gcs_path string) error {
 	// Set filename if not passed
 	if f.Filename == "" {
 		split := strings.Split(f.Url, "/")
@@ -42,7 +42,7 @@ func (f *File) Defaults(path, path_temp string) error {
 	// Local and Bucket output path
 	f.LocalOutput = filepath.Join(path, f.Filename)
 	f.LocalTempOutput = filepath.Join(path_temp, f.Filename)
-	f.BucketOutput = filepath.Join(updated.Format("200601"), f.Filename)
+	f.BucketOutput = filepath.Join(gcs_path, updated.Format("200601"), f.Filename)
 
 	return nil
 }

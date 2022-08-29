@@ -11,6 +11,7 @@ import (
 const URL = "http://200.152.38.155/CNPJ/"
 const PATH = "data"
 const PATH_TEMP = "data/temp"
+const GCS_PATH = ""
 
 // Download the partitions
 const MAX_GOROUTINES = 500
@@ -33,7 +34,7 @@ func main() {
 		panic(err)
 	}
 
-	errs := files.Run(PATH, PATH_TEMP, CHUNK_SIZE)
+	errs := files.Run(PATH, PATH_TEMP, GCS_PATH, CHUNK_SIZE)
 	timer := time.Since(tini).Minutes()
 	if len(errs) == 0 {
 		logrus.Infof("Downloaded %d files in %.2f minutes", files.Len(), timer)

@@ -11,7 +11,7 @@ type Files struct {
 	f []File
 }
 
-func (fs *Files) Run(path, path_temp string, chunk_size int) []error {
+func (fs *Files) Run(path, path_temp, gcs_path string, chunk_size int) []error {
 	wg := new(sync.WaitGroup)
 	errors := make(chan error, len(fs.f))
 	all_errors := []error{}
@@ -22,7 +22,7 @@ func (fs *Files) Run(path, path_temp string, chunk_size int) []error {
 		go func(f File, w *sync.WaitGroup) {
 			defer w.Done()
 
-			err := f.Defaults(path, path_temp)
+			err := f.Defaults(path, path_temp, gcs_path)
 			if err != nil {
 				log.Error(err)
 				errors <- err
