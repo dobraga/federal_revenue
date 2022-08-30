@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -22,22 +23,21 @@ func (t *Table) Create() error {
 
 	// Occurs error when table not exits
 	if err != nil {
-		metaData, err := tableMetadata(fmt.Sprintf("resources/%s.json", t.Name))
+		metaData, err := TableMetadata(fmt.Sprintf("resources/%s.json", t.Name))
 		if err != nil {
 			return fmt.Errorf("error creating metadata table '%s': %v", t.Name, err)
 		}
 
-		err = tableRef.Create(ctx, metaData)
-		if err != nil {
-			return fmt.Errorf("error creating table '%s': %v", t.Name, err)
-		}
+		tableRef.Create(ctx, metaData)
 
 		return nil
 	}
 	return nil
 }
 
-func tableMetadata(file string) (*bigquery.TableMetadata, error) {
+func TableMetadata(file string) (*bigquery.TableMetadata, error) {
+	var map_schema []map[string]interface{}
+
 	// Read json file and decode
 	jsonFile, err := os.Open(file)
 	if err != nil {
@@ -45,6 +45,10 @@ func tableMetadata(file string) (*bigquery.TableMetadata, error) {
 	}
 
 	byteValue, err := ioutil.ReadAll(jsonFile)
+	if err != nil {
+		return &bigquery.TableMetadata{}, err
+	}
+	err = json.Unmarshal(byteValue, &map_schema)
 	if err != nil {
 		return &bigquery.TableMetadata{}, err
 	}
@@ -61,7 +65,25 @@ func tableMetadata(file string) (*bigquery.TableMetadata, error) {
 			Field:                  "CREATED_AT",
 			RequirePartitionFilter: true,
 		},
+		Clustering: &bigquery.Clustering{
+			Fields: getCluster(map_schema, []string{"ORIGIN", "CNPJ_BASICO", "CNPJ_CPF", "CODIGO"}),
+		},
 	}
 
 	return metaData, nil
+}
+
+func getCluster(schema []map[string]interface{}, all_clusters []string) []string {
+	var cluster []string
+
+	for _, s := range schema {
+		for _, c := range all_clusters {
+			if s["name"] == c {
+				cluster = append(cluster, s["name"].(string))
+			}
+
+		}
+	}
+
+	return cluster
 }
