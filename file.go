@@ -60,7 +60,7 @@ func (f *File) Defaults(path, path_temp, gcs_path string) error {
 func (f *File) Run(chunk_size int) error {
 	var err error
 	timer := StartTimer()
-	defer func(e error) { timer.Close(fmt.Sprintf("Processing '%s'", f.Url), "INFO", err) }(err)
+	defer func(e error) { timer.Close("Processing '%s'", "INFO", err, f.Url) }(err)
 
 	t := Table{f.Type}
 	err = t.Create()
@@ -144,7 +144,7 @@ func (f *File) Run(chunk_size int) error {
 func (f *File) Download(chunk_size int) error {
 	var err error
 	timer := StartTimer()
-	defer func(e error) { timer.Close(fmt.Sprintf("Downloaded '%s' to '%s'", f.Url, f.LocalOutput), "INFO", err) }(err)
+	defer func(e error) { timer.Close("Downloaded '%s' to '%s'", "INFO", err, f.Url, f.LocalOutput) }(err)
 
 	f.SetChunks(chunk_size)
 	logrus.Infof("Downloading '%s' to '%s' %d bytes in %d parts", f.Url, f.LocalOutput, f.Size, len(f.Chunks))
@@ -177,7 +177,7 @@ func (f *File) Download(chunk_size int) error {
 func (f *File) Extract() error {
 	var err error
 	timer := StartTimer()
-	defer func(e error) { timer.Close(fmt.Sprintf("Unzip and decode '%s'", f.LocalOutput), "DEBUG", err) }(err)
+	defer func(e error) { timer.Close("Unzip and decode '%s'", "DEBUG", err, f.LocalOutput) }(err)
 
 	zf, err := zip.OpenReader(f.LocalOutput)
 	if err != nil {
@@ -221,7 +221,7 @@ func (f *File) Extract() error {
 func (f *File) AddFields() error {
 	var err error
 	timer := StartTimer()
-	defer func(e error) { timer.Close(fmt.Sprintf("Add fields '%s'", f.Filename), "DEBUG", err) }(err)
+	defer func(e error) { timer.Close("Add fields to '%s'", "DEBUG", err, f.Filename) }(err)
 
 	command := fmt.Sprintf("sed s/$/';\"%s\";\"%s\"'/ '%s' > '%s'", f.Filename, f.UpdatedAt.Format("2006-01-02"), f.LocalUnziped, f.ProcessedOutput)
 
@@ -238,7 +238,7 @@ func (f *File) AddFields() error {
 func (f *File) RemoveNonASCII() error {
 	var err error
 	timer := StartTimer()
-	defer func(e error) { timer.Close(fmt.Sprintf("Remove non ASCII '%s'", f.Filename), "DEBUG", err) }(err)
+	defer func(e error) { timer.Close("Remove non ASCII characters from '%s'", "DEBUG", err, f.Filename) }(err)
 
 	command := fmt.Sprintf("perl -i -pe 's/[^[:ascii:]]//g' '%s'", f.ProcessedOutput)
 

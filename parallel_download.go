@@ -67,7 +67,7 @@ func retry_download_range(client http.Client, url, filename string, ini, end, re
 func download_range(client http.Client, url, filename string, ini, end int) error {
 	var err error
 	timer := StartTimer()
-	defer func(e error) { timer.Close(fmt.Sprintf("Downloaded part '%s'", filename), "DEBUG", err) }(err)
+	defer func(e error) { timer.Close("Downloaded part '%s'", "DEBUG", err, filename) }(err)
 
 	filesize := end - ini + 1
 

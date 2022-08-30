@@ -57,7 +57,7 @@ func (bq *BigQueryHandle) UploadLocalData(filename, tablename string) error {
 	var err error
 	timer := StartTimer()
 	defer func(e error) {
-		timer.Close(fmt.Sprintf("Upload from '%s' to BigQuery '%s'", filename, tablename), "INFO", err)
+		timer.Close("Upload from '%s' to BigQuery '%s'", "INFO", err, filename, tablename)
 	}(err)
 
 	ctx := context.Background()

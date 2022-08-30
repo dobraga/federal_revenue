@@ -23,6 +23,8 @@ func main() {
 	InitBQ()
 	InitStorage()
 
+	var qtd_downloaded, qtd_total int
+	var errors []error
 	t := StartTimer()
 
 	err := os.MkdirAll(PATH_TEMP, 0777)
@@ -35,11 +37,12 @@ func main() {
 		panic(err)
 	}
 
-	errs := files.Run(PATH, PATH_TEMP, GCS_PATH, CHUNK_SIZE)
-	if len(errs) == 0 {
-		t.Close(fmt.Sprintf("Downloaded %d files", files.Len()), "INFO", nil)
-	} else {
-		t.Close(fmt.Sprintf("Downloaded %d/%d files with errors: %+v", len(errs), files.Len(), errs), "WARN", nil)
+	qtd_total = files.Len()
+	errors = files.Run(PATH, PATH_TEMP, GCS_PATH, CHUNK_SIZE)
+	qtd_downloaded = qtd_total - len(errors)
+	t.Close("Processed %d/%d files", "INFO", errors, qtd_downloaded, qtd_total)
+
+	if len(errors) > 0 {
 		os.Exit(1)
 	}
 }

@@ -35,7 +35,7 @@ func (s *StorageHandle) Upload(file, output string) error {
 	var err error
 	timer := StartTimer()
 	defer func(e error) {
-		timer.Close(fmt.Sprintf("Upload from '%s' to Storage '%s'", file, output), "INFO", err)
+		timer.Close("Upload from '%s' to Storage '%s'", "INFO", err, file, output)
 	}(err)
 
 	// Set timeout
@@ -70,7 +70,7 @@ func (s *StorageHandle) Download(file, output string) error {
 	var err error
 	timer := StartTimer()
 	defer func(e error) {
-		timer.Close(fmt.Sprintf("Downloaded from Storage '%s' to '%s'", file, output), "INFO", err)
+		timer.Close("Downloaded from Storage '%s' to '%s'", "INFO", err, file, output)
 	}(err)
 
 	// Check file exists
