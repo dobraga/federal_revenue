@@ -240,7 +240,7 @@ func (f *File) RemoveNonASCII() error {
 	timer := StartTimer()
 	defer func(e error) { timer.Close("Remove non ASCII characters from '%s'", "DEBUG", err, f.Filename) }(err)
 
-	command := fmt.Sprintf("perl -i -pe 's/[^[:ascii:]]//g' '%s'", f.ProcessedOutput)
+	command := fmt.Sprintf("sed -i 's/[^[:print:]]//g' '%s'", f.ProcessedOutput)
 
 	cmd := exec.Command("bash", "-c", command)
 	cmd.Start()
