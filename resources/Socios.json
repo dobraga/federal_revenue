@@ -43,12 +43,6 @@
         "description": "CÓDIGO PAÍS DO SÓCIO ESTRANGEIRO"
     },
     {
-        "name": "REPRESENTANTE_LEGAL",
-        "type": "STRING",
-        "mode": "REQUIRED",
-        "description": "NÚMERO DO CPF DO REPRESENTANTE LEGAL"
-    },
-    {
         "name": "CPF_REPRESENTANTE_LEGAL",
         "type": "STRING",
         "mode": "REQUIRED",
