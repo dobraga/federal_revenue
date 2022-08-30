@@ -54,8 +54,11 @@ func (bq *BigQueryHandle) NewPartition(origin string, updated_at time.Time) {
 
 // Upload local csv
 func (bq *BigQueryHandle) UploadLocalData(filename, tablename string) error {
-	t := StartTimer()
-	defer t.Close(fmt.Sprintf("Upload from '%s' to BigQuery '%s'", filename, tablename), "INFO")
+	var err error
+	timer := StartTimer()
+	defer func(e error) {
+		timer.Close(fmt.Sprintf("Upload from '%s' to BigQuery '%s'", filename, tablename), "INFO", err)
+	}(err)
 
 	ctx := context.Background()
 

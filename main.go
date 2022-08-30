@@ -37,9 +37,9 @@ func main() {
 
 	errs := files.Run(PATH, PATH_TEMP, GCS_PATH, CHUNK_SIZE)
 	if len(errs) == 0 {
-		t.Close(fmt.Sprintf("Downloaded %d files", files.Len()), "INFO")
+		t.Close(fmt.Sprintf("Downloaded %d files", files.Len()), "INFO", nil)
 	} else {
-		t.Close(fmt.Sprintf("Downloaded %d(%d total) files with errors: %+v", len(errs), files.Len(), errs), "WARN")
+		t.Close(fmt.Sprintf("Downloaded %d/%d files with errors: %+v", len(errs), files.Len(), errs), "WARN", nil)
 		os.Exit(1)
 	}
 }

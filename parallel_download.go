@@ -65,7 +65,10 @@ func retry_download_range(client http.Client, url, filename string, ini, end, re
 }
 
 func download_range(client http.Client, url, filename string, ini, end int) error {
-	t := StartTimer()
+	var err error
+	timer := StartTimer()
+	defer func(e error) { timer.Close(fmt.Sprintf("Downloaded part '%s'", filename), "DEBUG", err) }(err)
+
 	filesize := end - ini + 1
 
 	// Check file exists or Create the file
@@ -94,7 +97,8 @@ func download_range(client http.Client, url, filename string, ini, end int) erro
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 206 {
-		return fmt.Errorf("partial request '%s' return status code %d", filename, resp.StatusCode)
+		err = fmt.Errorf("partial request '%s' return status code %d", filename, resp.StatusCode)
+		return err
 	}
 
 	// Write the body to file
@@ -103,7 +107,6 @@ func download_range(client http.Client, url, filename string, ini, end int) erro
 		return err
 	}
 
-	t.Close(fmt.Sprintf("Downloaded part '%s'", filename), "DEBUG")
 	return nil
 }
 

@@ -32,8 +32,11 @@ func InitStorage() {
 
 // Upload local file to google cloud storage
 func (s *StorageHandle) Upload(file, output string) error {
-	t := StartTimer()
-	defer t.Close(fmt.Sprintf("Upload from '%s' to Storage '%s'", file, output), "INFO")
+	var err error
+	timer := StartTimer()
+	defer func(e error) {
+		timer.Close(fmt.Sprintf("Upload from '%s' to Storage '%s'", file, output), "INFO", err)
+	}(err)
 
 	// Set timeout
 	ctx := context.Background()
@@ -64,11 +67,14 @@ func (s *StorageHandle) Upload(file, output string) error {
 
 // Download google cloud storage to local
 func (s *StorageHandle) Download(file, output string) error {
-	t := StartTimer()
-	defer t.Close(fmt.Sprintf("Downloaded from Storage '%s' to '%s'", file, output), "INFO")
+	var err error
+	timer := StartTimer()
+	defer func(e error) {
+		timer.Close(fmt.Sprintf("Downloaded from Storage '%s' to '%s'", file, output), "INFO", err)
+	}(err)
 
 	// Check file exists
-	_, err := os.Stat(output)
+	_, err = os.Stat(output)
 	if err == nil {
 		err = fmt.Errorf("'%s' already exists, delete it before run it", output)
 		logrus.Error(err)

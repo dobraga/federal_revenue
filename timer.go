@@ -21,8 +21,14 @@ func (t *Timer) Start() {
 	t.Ini = time.Now()
 }
 
-func (t *Timer) Close(message, level string) {
+func (t *Timer) Close(message, level string, err error) {
 	t.Minutes = time.Since(t.Ini).Minutes()
+
+	if err != nil {
+		logrus.Errorf("%s in %.2f minutes: %v", message, t.Minutes, err)
+		return
+	}
+
 	if level == "INFO" {
 		logrus.Infof("%s in %.2f minutes", message, t.Minutes)
 		return

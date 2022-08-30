@@ -26,6 +26,7 @@ type File struct {
 	Path            string
 	LocalOutput     string
 	LocalUnziped    string
+	ProcessedOutput string
 	LocalTempOutput string
 	BucketOutput    string
 }
@@ -58,6 +59,8 @@ func (f *File) Defaults(path, path_temp, gcs_path string) error {
 // Check already downloaded, Download and upload to storage
 func (f *File) Run(chunk_size int) error {
 	var err error
+	timer := StartTimer()
+	defer func(e error) { timer.Close(fmt.Sprintf("Processing '%s'", f.Url), "INFO", err) }(err)
 
 	t := Table{f.Type}
 	err = t.Create()
@@ -119,33 +122,35 @@ func (f *File) Run(chunk_size int) error {
 	defer os.Remove(f.LocalUnziped)
 
 	// Add date and origin to file
-	finalFile := fmt.Sprintf("%s_", f.LocalUnziped)
-	command := fmt.Sprintf("sed s/$/';\"%s\";\"%s\"'/ '%s' > '%s'", f.Filename, f.UpdatedAt.Format("2006-01-02"), f.LocalUnziped, finalFile)
-
-	cmd := exec.Command("bash", "-c", command)
-	cmd.Start()
-	err = cmd.Wait()
+	err = f.AddFields()
 	if err != nil {
 		return err
 	}
-	defer os.Remove(finalFile)
+	err = f.RemoveNonASCII()
+	if err != nil {
+		return err
+	}
 
-	err = BQ.UploadLocalData(finalFile, f.Type)
+	err = BQ.UploadLocalData(f.ProcessedOutput, f.Type)
 	if err == nil {
+		os.Remove(f.ProcessedOutput)
 		os.Remove(f.LocalOutput)
 	}
+
 	return err
 }
 
 // Download to local file
 func (f *File) Download(chunk_size int) error {
-	tini := time.Now()
+	var err error
+	timer := StartTimer()
+	defer func(e error) { timer.Close(fmt.Sprintf("Downloaded '%s' to '%s'", f.Url, f.LocalOutput), "INFO", err) }(err)
 
 	f.SetChunks(chunk_size)
 	logrus.Infof("Downloading '%s' to '%s' %d bytes in %d parts", f.Url, f.LocalOutput, f.Size, len(f.Chunks))
 
 	// Concurrent download
-	err := ParallelDownload(HttpClient, f.Url, f.LocalTempOutput, f.Chunks)
+	err = ParallelDownload(HttpClient, f.Url, f.LocalTempOutput, f.Chunks)
 	if err != nil {
 		err = fmt.Errorf("error downloading '%s': %v", f.Url, err)
 		logrus.Error(err)
@@ -166,13 +171,14 @@ func (f *File) Download(chunk_size int) error {
 		os.Remove(file)
 	}
 
-	timer := time.Since(tini).Minutes()
-	logrus.Infof("Downloaded '%s' to '%s' in %.2f minutes", f.Url, f.LocalOutput, timer)
-
 	return nil
 }
 
 func (f *File) Extract() error {
+	var err error
+	timer := StartTimer()
+	defer func(e error) { timer.Close(fmt.Sprintf("Unzip and decode '%s'", f.LocalOutput), "DEBUG", err) }(err)
+
 	zf, err := zip.OpenReader(f.LocalOutput)
 	if err != nil {
 		return err
@@ -185,6 +191,7 @@ func (f *File) Extract() error {
 
 		// Destination
 		f.LocalUnziped = filepath.Join(f.Path, file.Name)
+		f.ProcessedOutput = fmt.Sprintf("%s_processed", f.LocalUnziped)
 		destinationFile, err := os.OpenFile(f.LocalUnziped, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 		if err != nil {
 			return err
@@ -198,7 +205,7 @@ func (f *File) Extract() error {
 		}
 		defer zipped_file.Close()
 
-		// Extract
+		// Extract and decode to UTF-8
 		r := charmap.Windows1250.NewDecoder().Reader(zipped_file)
 
 		_, err = io.Copy(destinationFile, r)
@@ -207,6 +214,40 @@ func (f *File) Extract() error {
 		}
 	}
 
+	return nil
+}
+
+// Add fields to processed file
+func (f *File) AddFields() error {
+	var err error
+	timer := StartTimer()
+	defer func(e error) { timer.Close(fmt.Sprintf("Add fields '%s'", f.Filename), "DEBUG", err) }(err)
+
+	command := fmt.Sprintf("sed s/$/';\"%s\";\"%s\"'/ '%s' > '%s'", f.Filename, f.UpdatedAt.Format("2006-01-02"), f.LocalUnziped, f.ProcessedOutput)
+
+	cmd := exec.Command("bash", "-c", command)
+	cmd.Start()
+	err = cmd.Wait()
+	if err != nil {
+		return fmt.Errorf("failed to add fields to '%s': %v", f.ProcessedOutput, err)
+	}
+	return nil
+}
+
+// Add fields to processed file
+func (f *File) RemoveNonASCII() error {
+	var err error
+	timer := StartTimer()
+	defer func(e error) { timer.Close(fmt.Sprintf("Remove non ASCII '%s'", f.Filename), "DEBUG", err) }(err)
+
+	command := fmt.Sprintf("perl -i -pe 's/[^[:ascii:]]//g' '%s'", f.ProcessedOutput)
+
+	cmd := exec.Command("bash", "-c", command)
+	cmd.Start()
+	err = cmd.Wait()
+	if err != nil {
+		return fmt.Errorf("failed to remove non ASCII characters in '%s': %v", f.ProcessedOutput, err)
+	}
 	return nil
 }
 
