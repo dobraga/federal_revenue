@@ -28,10 +28,10 @@ func ParallelDownload(c http.Client, url, output string, chunks [][2]int) error 
 
 		go func(c http.Client, u, o string, i int, chunk [2]int, w *sync.WaitGroup) {
 			defer w.Done()
+			defer func() { <-semaphore }()
 
 			part_file := fmt.Sprintf("%s.part%d", o, i)
 			err := retry_download_range(c, u, part_file, chunk[0], chunk[1], MAX_RETRY)
-			<-semaphore
 			if err != nil {
 				log.Error(err)
 				errors <- err
