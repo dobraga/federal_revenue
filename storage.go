@@ -32,7 +32,9 @@ func InitStorage() {
 
 // Upload local file to google cloud storage
 func (s *StorageHandle) Upload(file, output string) error {
-	tini := time.Now()
+	t := Timer{}
+	t.Start()
+	defer t.Close(fmt.Sprintf("Upload from '%s' to Storage '%s'", file, output), "INFO")
 
 	// Set timeout
 	ctx := context.Background()
@@ -45,7 +47,7 @@ func (s *StorageHandle) Upload(file, output string) error {
 
 	reader, err := os.Open(file)
 	if err != nil {
-		err = fmt.Errorf("failed uploading '%s' to '%s': %v", file, output, err)
+		err = fmt.Errorf("failed uploading '%s' to Storage '%s': %v", file, output, err)
 		logrus.Error(err)
 		return err
 	}
@@ -53,19 +55,19 @@ func (s *StorageHandle) Upload(file, output string) error {
 
 	_, err = io.Copy(wc, reader)
 	if err != nil {
-		err = fmt.Errorf("failed uploading '%s' to '%s': %v", file, output, err)
+		err = fmt.Errorf("failed uploading '%s' to Storage '%s': %v", file, output, err)
 		logrus.Error(err)
 		return err
 	}
 
-	timer := time.Since(tini).Minutes()
-	logrus.Infof("Uploaded '%s' to '%s' in %.2f minutes", file, output, timer)
 	return nil
 }
 
 // Download google cloud storage to local
 func (s *StorageHandle) Download(file, output string) error {
-	tini := time.Now()
+	t := Timer{}
+	t.Start()
+	defer t.Close(fmt.Sprintf("Downloaded from Storage '%s' to '%s'", file, output), "INFO")
 
 	// Check file exists
 	_, err := os.Stat(output)
@@ -83,7 +85,7 @@ func (s *StorageHandle) Download(file, output string) error {
 	// Reader
 	rc, err := s.storage.Object(file).NewReader(ctx)
 	if err != nil {
-		err = fmt.Errorf("error downloading '%s' to '%s': %v", file, output, err)
+		err = fmt.Errorf("error downloading from Storage '%s' to '%s': %v", file, output, err)
 		logrus.Error(err)
 		return err
 	}
@@ -92,7 +94,7 @@ func (s *StorageHandle) Download(file, output string) error {
 	// New file
 	f, err := os.Create(output)
 	if err != nil {
-		err = fmt.Errorf("error downloading '%s' to '%s': %v", file, output, err)
+		err = fmt.Errorf("error downloading from Storage '%s' to '%s': %v", file, output, err)
 		logrus.Error(err)
 		return err
 	}
@@ -101,13 +103,11 @@ func (s *StorageHandle) Download(file, output string) error {
 	// Write
 	_, err = io.Copy(f, rc)
 	if err != nil {
-		err = fmt.Errorf("error downloading '%s' to '%s': %v", file, output, err)
+		err = fmt.Errorf("error downloading from Storage '%s' to '%s': %v", file, output, err)
 		logrus.Error(err)
 		return err
 	}
 
-	timer := time.Since(tini).Minutes()
-	logrus.Infof("Downloaded '%s' to '%s' in %.2f minutes", file, output, timer)
 	return nil
 }
 

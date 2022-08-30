@@ -54,8 +54,10 @@ func (bq *BigQueryHandle) NewPartition(origin string, updated_at time.Time) {
 
 // Upload local csv
 func (bq *BigQueryHandle) UploadLocalData(filename, tablename string) error {
+	t := Timer{}
+	t.Start()
+	defer t.Close(fmt.Sprintf("Upload from '%s' to BigQuery '%s'", filename, tablename), "INFO")
 
-	tini := time.Now()
 	ctx := context.Background()
 
 	f, err := os.Open(filename)
@@ -81,19 +83,17 @@ func (bq *BigQueryHandle) UploadLocalData(filename, tablename string) error {
 
 	job, err := loader.Run(ctx)
 	if err != nil {
-		return fmt.Errorf("error loading data from '%s' to '%s': %v", filename, tablename, err)
+		return fmt.Errorf("error loading data from '%s' to BigQuery '%s': %v", filename, tablename, err)
 	}
 	status, err := job.Wait(ctx)
 	if err != nil {
-		return fmt.Errorf("error loading data from '%s' to '%s': %v", filename, tablename, err)
+		return fmt.Errorf("error loading data from '%s' to BigQuery '%s': %v", filename, tablename, err)
 	}
 	err = status.Err()
 	if err != nil {
-		return fmt.Errorf("error loading data from '%s' to '%s': %v", filename, tablename, err)
+		return fmt.Errorf("error loading data from '%s' to BigQuery '%s': %v", filename, tablename, err)
 	}
 
-	timer := time.Since(tini).Minutes()
-	logrus.Infof("Uploaded from '%s' to '%s' in %.2f minutes", filename, tablename, timer)
 	return nil
 }
 
