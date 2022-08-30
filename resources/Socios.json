@@ -49,6 +49,18 @@
         "description": "NÚMERO DO CPF DO REPRESENTANTE LEGAL"
     },
     {
+        "name": "CPF_REPRESENTANTE_LEGAL",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "CPF DO REPRESENTANTE LEGAL"
+    },
+    {
+        "name": "NOME_REPRESENTANTE_LEGAL",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "NOME DO REPRESENTANTE LEGAL"
+    },
+    {
         "name": "QUALIFICACAO_REPRESENTANTE_LEGAL",
         "type": "STRING",
         "mode": "REQUIRED",
