@@ -1,24 +1,31 @@
 package main
 
 import (
+	"archive/zip"
 	"fmt"
+	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/sirupsen/logrus"
+	"golang.org/x/text/encoding/charmap"
 )
 
 type File struct {
+	Type            string
 	Url             string
 	Size            int
 	Chunks          [][2]int
 	UpdatedAtStr    string
 	UpdatedAt       time.Time
 	Filename        string
+	Path            string
 	LocalOutput     string
+	LocalUnziped    string
 	LocalTempOutput string
 	BucketOutput    string
 }
@@ -40,6 +47,7 @@ func (f *File) Defaults(path, path_temp, gcs_path string) error {
 	f.UpdatedAt = updated
 
 	// Local and Bucket output path
+	f.Path = path
 	f.LocalOutput = filepath.Join(path, f.Filename)
 	f.LocalTempOutput = filepath.Join(path_temp, f.Filename)
 	f.BucketOutput = filepath.Join(gcs_path, updated.Format("200601"), f.Filename)
@@ -49,6 +57,23 @@ func (f *File) Defaults(path, path_temp, gcs_path string) error {
 
 // Check already downloaded, Download and upload to storage
 func (f *File) Run(chunk_size int) error {
+	var err error
+
+	t := Table{f.Type}
+	err = t.Create()
+	if err != nil {
+		return err
+	}
+
+	last_partition, err := BQ.LastPartition(f.Type, f.Filename)
+	if err != nil {
+		return err
+	}
+	if last_partition.Year() > 1 && f.UpdatedAt.After(last_partition) {
+		logrus.Infof("'%s' already processed in bigquery", f.Url)
+		return nil
+	}
+
 	uploaded := f.CheckUploaded()
 	downloaded := f.CheckDownloaded()
 
@@ -56,25 +81,60 @@ func (f *File) Run(chunk_size int) error {
 	if uploaded {
 		if downloaded {
 			// Downloaded
-			logrus.Infof("Already processed '%s'", f.Url)
-			return nil
+			logrus.Infof("'%s' already processed in storage", f.Url)
 		} else {
 			// Not downloaded
-			return Storage.Download(f.BucketOutput, f.LocalOutput)
+			err = Storage.Download(f.BucketOutput, f.LocalOutput)
+			if err != nil {
+				return err
+			}
 		}
+	} else {
+		if downloaded {
+			// Downloaded but not uploaded
+			err = Storage.Upload(f.LocalOutput, f.BucketOutput)
+			if err != nil {
+				return err
+			}
+		} else {
+			// Not downloaded and not uploaded
+			err = f.Download(chunk_size)
+			if err != nil {
+				return err
+			}
+		}
+
+		err = Storage.Upload(f.LocalOutput, f.BucketOutput)
+		if err != nil {
+			return err
+		}
+
 	}
 
-	if downloaded {
-		// Downloaded but not uploaded
-		return Storage.Upload(f.LocalOutput, f.BucketOutput)
-	}
-
-	// Not downloaded and not uploaded
-	err := f.Download(chunk_size)
+	// Unzip
+	err = f.Extract()
 	if err != nil {
 		return err
 	}
-	return Storage.Upload(f.LocalOutput, f.BucketOutput)
+	defer os.Remove(f.LocalUnziped)
+
+	// Add date and origin to file
+	finalFile := fmt.Sprintf("%s_", f.LocalUnziped)
+	command := fmt.Sprintf("sed s/$/';\"%s\";\"%s\"'/ '%s' > '%s'", f.Filename, f.UpdatedAt.Format("2006-01-02"), f.LocalUnziped, finalFile)
+
+	cmd := exec.Command("bash", "-c", command)
+	cmd.Start()
+	err = cmd.Wait()
+	if err != nil {
+		return err
+	}
+	defer os.Remove(finalFile)
+
+	err = BQ.UploadLocalData(finalFile, f.Type)
+	if err == nil {
+		os.Remove(f.LocalOutput)
+	}
+	return err
 }
 
 // Download to local file
@@ -108,6 +168,44 @@ func (f *File) Download(chunk_size int) error {
 
 	timer := time.Since(tini).Minutes()
 	logrus.Infof("Downloaded '%s' to '%s' in %.2f minutes", f.Url, f.LocalOutput, timer)
+
+	return nil
+}
+
+func (f *File) Extract() error {
+	zf, err := zip.OpenReader(f.LocalOutput)
+	if err != nil {
+		return err
+	}
+
+	for i, file := range zf.File {
+		if i > 0 {
+			return fmt.Errorf("zipfile '%s' contains multiple files", f.LocalOutput)
+		}
+
+		// Destination
+		f.LocalUnziped = filepath.Join(f.Path, file.Name)
+		destinationFile, err := os.OpenFile(f.LocalUnziped, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+		if err != nil {
+			return err
+		}
+		defer destinationFile.Close()
+
+		// Zipped
+		zipped_file, err := file.Open()
+		if err != nil {
+			return err
+		}
+		defer zipped_file.Close()
+
+		// Extract
+		r := charmap.Windows1250.NewDecoder().Reader(zipped_file)
+
+		_, err = io.Copy(destinationFile, r)
+		if err != nil {
+			return err
+		}
+	}
 
 	return nil
 }

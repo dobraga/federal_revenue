@@ -1,0 +1,194 @@
+[
+    {
+        "name": "CNPJ_BASICO",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "NÚMERO BASE DE INSCRIÇÃO NO CNPJ (OITO PRIMEIROS DÍGITOS DO CNPJ)."
+    },
+    {
+        "name": "CNPJ_ORDEM",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "NÚMERO DO ESTABELECIMENTO DE INSCRIÇÃO NO CNPJ (DO NONO ATÉ O DÉCIMO SEGUNDO DÍGITO DO CNPJ)."
+    },
+    {
+        "name": "CNPJ_DV",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "DÍGITO VERIFICADOR DO NÚMERO DE INSCRIÇÃO NO CNPJ (DOIS ÚLTIMOS DÍGITOS DO CNPJ)."
+    },
+    {
+        "name": "TIPO_ESTABELIECIMENTO",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "CÓDIGO DO IDENTIFICADOR MATRIZ/FILIAL\n:1: MATRIZ\n2: FILIAL"
+    },
+    {
+        "name": "NOME_FANTASIA",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "CORRESPONDE AO NOME FANTASIA"
+    },
+    {
+        "name": "SITUACAO_CADASTRAL",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "CÓDIGO DA SITUAÇÃO CADASTRAL:\n01: NULA\n2: ATIVA\n3: SUSPENSA\n4: INAPTA\n08: BAIXADA"
+    },
+    {
+        "name": "DATA_SITUACAO_CADASTRAL",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "DATA DO EVENTO DA SITUAÇÃO CADASTRAL"
+    },
+    {
+        "name": "MOTIVO_SITUACAO_CADASTRAL",
+        "type": "STRING",
+        "mode": "NULLABLE",
+        "description": "CÓDIGO DO MOTIVO DA SITUAÇÃO CADASTRAL"
+    },
+    {
+        "name": "NOME_CIDADE",
+        "type": "STRING",
+        "mode": "NULLABLE",
+        "description": "NOME DA CIDADE NO EXTERIOR"
+    },
+    {
+        "name": "CODIGO_PAIS",
+        "type": "STRING",
+        "mode": "NULLABLE",
+        "description": "CÓDIGO DO PAISL"
+    },
+    {
+        "name": "DATA_INICIO_ATIVIDADE",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "DATA DE INÍCIO DA ATIVIDADE"
+    },
+    {
+        "name": "CNAE_PRINCIPAL",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "CÓDIGO DA ATIVIDADE ECONÔMICA PRINCIPAL DO ESTABELECIMENTO"
+    },
+    {
+        "name": "CNAE_SECUNDARIO",
+        "type": "STRING",
+        "mode": "NULLABLE",
+        "description": "CÓDIGO DA(S) ATIVIDADE(S) ECONÔMICA(S) SECUNDÁRIA(S) DO ESTABELECIMENTO"
+    },
+    {
+        "name": "TIPO_LOGRADOURO",
+        "type": "STRING",
+        "mode": "NULLABLE",
+        "description": "DESCRIÇÃO DO TIPO DE LOGRADOURO"
+    },
+    {
+        "name": "LOGRADOURO",
+        "type": "STRING",
+        "mode": "NULLABLE",
+        "description": "NOME DO LOGRADOURO ONDE SE LOCALIZA O ESTABELECIMENTO."
+    },
+    {
+        "name": "NUMERO",
+        "type": "STRING",
+        "mode": "NULLABLE",
+        "description": "NÚMERO ONDE SE LOCALIZA O ESTABELECIMENTO. QUANDO NÃO HOUVER PREENCHIMENTO DO NÚMERO HAVERÁ 'S/N'"
+    },
+    {
+        "name": "COMPLEMENTO",
+        "type": "STRING",
+        "mode": "NULLABLE",
+        "description": "COMPLEMENTO PARA O ENDEREÇO DE LOCALIZAÇÃO DO ESTABELECIMENTO"
+    },
+    {
+        "name": "BAIRRO",
+        "type": "STRING",
+        "mode": "NULLABLE",
+        "description": "BAIRRO ONDE SE LOCALIZA O ESTABELECIMENTO"
+    },
+    {
+        "name": "CEP",
+        "type": "STRING",
+        "mode": "NULLABLE",
+        "description": "CÓDIGO DE ENDEREÇAMENTO POSTAL REFERENTE AO LOGRADOURO NO QUAL O ESTABELECIMENTO ESTA LOCALIZADO"
+    },
+    {
+        "name": "UF",
+        "type": "STRING",
+        "mode": "NULLABLE",
+        "description": "SIGLA DA UNIDADE DA FEDERAÇÃO EM QUE SE ENCONTRA O ESTABELECIMENTO"
+    },
+    {
+        "name": "MUNICIPIO",
+        "type": "STRING",
+        "mode": "NULLABLE",
+        "description": "CÓDIGO DO MUNICÍPIO DE JURISDIÇÃO ONDE SE ENCONTRA O ESTABELECIMENTO"
+    },
+    {
+        "name": "DDD_1",
+        "type": "STRING",
+        "mode": "NULLABLE",
+        "description": "CONTÉM O DDD 1"
+    },
+    {
+        "name": "TELEFONE_1",
+        "type": "STRING",
+        "mode": "NULLABLE",
+        "description": "CONTÉM O NÚMERO DO TELEFONE 1"
+    },
+    {
+        "name": "DDD_2",
+        "type": "STRING",
+        "mode": "NULLABLE",
+        "description": "CONTÉM O DDD 2"
+    },
+    {
+        "name": "TELEFONE_2",
+        "type": "STRING",
+        "mode": "NULLABLE",
+        "description": "CONTÉM O NÚMERO DO TELEFONE 2"
+    },
+    {
+        "name": "DDD_FAX",
+        "type": "STRING",
+        "mode": "NULLABLE",
+        "description": "CONTÉM O DDD DO FAX"
+    },
+    {
+        "name": "FAX",
+        "type": "STRING",
+        "mode": "NULLABLE",
+        "description": "CONTÉM O NÚMERO DO FAX"
+    },
+    {
+        "name": "EMAIL",
+        "type": "STRING",
+        "mode": "NULLABLE",
+        "description": "CONTÉM O E-MAIL DO CONTRIBUINTE"
+    },
+    {
+        "name": "SITUACAO_ESPECIAL",
+        "type": "STRING",
+        "mode": "NULLABLE",
+        "description": "SITUAÇÃO ESPECIAL DA EMPRESA"
+    },
+    {
+        "name": "DATA_SITUACAO_ESPECIAL",
+        "type": "STRING",
+        "mode": "NULLABLE ",
+        "description": "DATA EM QUE A EMPRESA ENTROU EM SITUAÇÃO ESPECIAL"
+    },
+    {
+        "name": "ORIGIN",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "ORIGEM DO REGISTRO"
+    },
+    {
+        "name": "CREATED_AT",
+        "type": "DATE",
+        "mode": "REQUIRED",
+        "description": "DATA DE CRIAÇÃO DO REGISTRO"
+    }
+]

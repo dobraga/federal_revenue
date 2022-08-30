@@ -1,0 +1,14 @@
+[
+    {
+        "name": "ORIGIN",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "ORIGEM DO REGISTRO"
+    },
+    {
+        "name": "LAST_CREATED_AT",
+        "type": "DATE",
+        "mode": "REQUIRED",
+        "description": "ULTIMA DATA DE CRIAÇÃO DO REGISTRO"
+    }
+]

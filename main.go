@@ -22,6 +22,9 @@ const REQUEST_TIMEOUT_MINUTES = 30
 const MAX_RETRY = 5
 
 func main() {
+	InitBQ()
+	InitStorage()
+
 	tini := time.Now()
 
 	err := os.MkdirAll(PATH_TEMP, 0777)
@@ -39,6 +42,6 @@ func main() {
 	if len(errs) == 0 {
 		logrus.Infof("Downloaded %d files in %.2f minutes", files.Len(), timer)
 	} else {
-		logrus.Warnf("Downloaded %d(%d total) files with errors in %.2f minutes", len(errs), files.Len(), timer)
+		logrus.Warnf("Downloaded %d(%d total) files with errors in %.2f minutes: %+v", len(errs), files.Len(), timer, errs)
 	}
 }

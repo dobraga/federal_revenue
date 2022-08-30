@@ -1,0 +1,56 @@
+[
+    {
+        "name": "CNPJ_BASICO",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "NÚMERO BASE DE INSCRIÇÃO NO CNPJ (OITO PRIMEIROS DÍGITOS DO CNPJ)."
+    },
+    {
+        "name": "RAZAO_SOCIAL",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "NOME EMPRESARIAL DA PESSOA JURÍDICA"
+    },
+    {
+        "name": "NATUREZA_JURIDICA",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "CÓDIGO DA NATUREZA JURÍDICA"
+    },
+    {
+        "name": "QUALIFICACAO_RESPONSAVEL",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "QUALIFICAÇÃO DA PESSOA FÍSICA RESPONSÁVEL PELA EMPRESA"
+    },
+    {
+        "name": "CAPITAL_SOCIAL",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "CAPITAL SOCIAL DA EMPRESA"
+    },
+    {
+        "name": "PORTE",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "CÓDIGO DO PORTE DA EMPRESA:\n00: NÃO INFORMADO\n01: MICRO EMPRESA\n03: EMPRESA DE PEQUENO PORTE\n05: DEMAIS"
+    },
+    {
+        "name": "ENTE_FED_RESPONSAVEL",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "O ENTE FEDERATIVO RESPONSÁVEL É PREENCHIDO PARA OS CASOS DE ÓRGÃOS E ENTIDADES DO GRUPO DE NATUREZA JURÍDICA 1XXX. PARA AS DEMAIS NATUREZAS, ESTE ATRIBUTO FICA EM BRANCO."
+    },
+    {
+        "name": "ORIGIN",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "ORIGEM DO REGISTRO"
+    },
+    {
+        "name": "CREATED_AT",
+        "type": "DATE",
+        "mode": "REQUIRED",
+        "description": "DATA DE CRIAÇÃO DO REGISTRO"
+    }
+]

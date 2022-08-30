@@ -17,7 +17,7 @@ type StorageHandle struct {
 	storage *storage.BucketHandle
 }
 
-func init() {
+func InitStorage() {
 	logrus.Debug("Creating client storage")
 	client, err := storage.NewClient(context.Background())
 	if err != nil {
@@ -36,7 +36,7 @@ func (s *StorageHandle) Upload(file, output string) error {
 
 	// Set timeout
 	ctx := context.Background()
-	ctx, cancel := context.WithTimeout(ctx, time.Minute*1)
+	ctx, cancel := context.WithTimeout(ctx, time.Minute*5)
 	defer cancel()
 
 	// Upload an object with storage.Writer
@@ -77,7 +77,7 @@ func (s *StorageHandle) Download(file, output string) error {
 
 	// Set timeout
 	ctx := context.Background()
-	ctx, cancel := context.WithTimeout(ctx, time.Minute*1)
+	ctx, cancel := context.WithTimeout(ctx, time.Minute*5)
 	defer cancel()
 
 	// Reader
@@ -109,6 +109,13 @@ func (s *StorageHandle) Download(file, output string) error {
 	timer := time.Since(tini).Minutes()
 	logrus.Infof("Downloaded '%s' to '%s' in %.2f minutes", file, output, timer)
 	return nil
+}
+
+// Remove file
+func (s *StorageHandle) Remove(file string) error {
+	ctx := context.Background()
+	obj := s.storage.Object(file)
+	return obj.Delete(ctx)
 }
 
 // Check file exists in google cloud storage

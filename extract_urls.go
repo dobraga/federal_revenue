@@ -1,10 +1,13 @@
 package main
 
 import (
+	"regexp"
 	"strings"
 
 	"github.com/antchfx/htmlquery"
 )
+
+var regex, _ = regexp.Compile("[^a-zA-Z]+")
 
 func ExtractUrls(url string) (Files, error) {
 	files := []File{}
@@ -22,10 +25,13 @@ func ExtractUrls(url string) (Files, error) {
 
 	for i, link := range links {
 		name := htmlquery.InnerText(link)
+
 		if strings.HasSuffix(name, ".zip") {
+			type_file := regex.ReplaceAllString(strings.Split(name, ".")[0], "")
+
 			u := url + name
 			d := htmlquery.InnerText(dates[i])
-			files = append(files, File{Url: u, UpdatedAtStr: d})
+			files = append(files, File{Url: u, UpdatedAtStr: d, Type: type_file})
 		}
 	}
 

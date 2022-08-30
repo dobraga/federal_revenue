@@ -1,0 +1,26 @@
+[
+    {
+        "name": "CODIGO",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "CÓDIGO DA NATUREZA JURÍDICA"
+    },
+    {
+        "name": "DESCRICAO",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "NOME DA NATUREZA JURÍDICA"
+    },
+    {
+        "name": "ORIGIN",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "ORIGEM DO REGISTRO"
+    },
+    {
+        "name": "CREATED_AT",
+        "type": "DATE",
+        "mode": "REQUIRED",
+        "description": "DATA DE CRIAÇÃO DO REGISTRO"
+    }
+]

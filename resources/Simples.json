@@ -1,0 +1,56 @@
+[   
+    {
+        "name": "CNPJ_BASICO",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "NÚMERO BASE DE INSCRIÇÃO NO CNPJ (OITO PRIMEIROS DÍGITOS DO CNPJ)."
+    },
+    {
+        "name": "SIMPLES",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "INDICADOR DA EXISTÊNCIA DA OPÇÃO PELO SIMPLES:\nS: SIM\nN: NÃO\nEM BRANCO: OUTROS"
+    },
+    {
+        "name": "DATA_OPCAO_SIMPLES",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "DATA DE OPÇÃO PELO SIMPLES"
+    },
+    {
+        "name": "DATA_EXCLUSAO_SIMPLES",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "DATA DE EXCLUSÃO DO SIMPLES"
+    },
+    {
+        "name": "MEI",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "INDICADOR DA EXISTÊNCIA DA OPÇÃO PELO MEI\nS - SIM\nN - NÃO\nEM BRANCO - OUTROS"
+    },
+    {
+        "name": "DATA_OPCAO_MEI",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "DATA DE OPÇÃO PELO MEI"
+    },
+    {
+        "name": "DATA_EXCLUSAO_MEI",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "DATA DE EXCLUSÃO DO MEI"
+    },
+    {
+        "name": "ORIGIN",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "ORIGEM DO REGISTRO"
+    },
+    {
+        "name": "CREATED_AT",
+        "type": "DATE",
+        "mode": "REQUIRED",
+        "description": "DATA DE CRIAÇÃO DO REGISTRO"
+    }
+]

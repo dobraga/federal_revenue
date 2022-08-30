@@ -1,0 +1,26 @@
+[
+    {
+        "name": "CODIGO",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "CÓDIGO DO MOTIVO"
+    },
+    {
+        "name": "DESCRICAO",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "MOTIVO"
+    },
+    {
+        "name": "ORIGIN",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "ORIGEM DO REGISTRO"
+    },
+    {
+        "name": "CREATED_AT",
+        "type": "DATE",
+        "mode": "REQUIRED",
+        "description": "DATA DE CRIAÇÃO DO REGISTRO"
+    }
+]

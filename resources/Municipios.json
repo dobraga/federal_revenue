@@ -1,0 +1,26 @@
+[
+    {
+        "name": "CODIGO",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "CÓDIGO DO MUNICÍPIO"
+    },
+    {
+        "name": "DESCRICAO",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "NOME DO MUNICÍPIO"
+    },
+    {
+        "name": "ORIGIN",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "ORIGEM DO REGISTRO"
+    },
+    {
+        "name": "CREATED_AT",
+        "type": "DATE",
+        "mode": "REQUIRED",
+        "description": "DATA DE CRIAÇÃO DO REGISTRO"
+    }
+]

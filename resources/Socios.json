@@ -1,0 +1,75 @@
+[
+    {
+        "name": "CNPJ_BASICO",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "NÚMERO BASE DE INSCRIÇÃO NO CNPJ (OITO PRIMEIROS DÍGITOS DO CNPJ)."
+    },
+    {
+        "name": "TP_SOCIO",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "CÓDIGO DO IDENTIFICADOR DE SÓCIO:\n1: PESSOA JURÍDICA\n2: PESSOA FÍSICA\n3: ESTRANGEIRO"
+    },
+    {
+        "name": "NOME",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "NOME DO SÓCIO PESSOA FÍSICA OU A RAZÃO SOCIAL E/OU NOME EMPRESARIAL DA PESSOA JURÍDICA E/OU NOME DO SÓCIO/RAZÃO SOCIAL DO SÓCIO ESTRANGEIRO"
+    },
+    {
+        "name": "CNPJ_CPF",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "CPF OU CNPJ DO SÓCIO (SÓCIO ESTRANGEIRO NÃO TEM ESTA INFORMAÇÃO)"
+    },
+    {
+        "name": "QUALIFICACAO",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "CÓDIGO DA QUALIFICAÇÃO DO SÓCIO"
+    },
+    {
+        "name": "DATA_ENTRADA_SOCIEDADE",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "DATA DE ENTRADA NA SOCIEDADE"
+    },
+
+    {
+        "name": "PAIS",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "CÓDIGO PAÍS DO SÓCIO ESTRANGEIRO"
+    },
+    {
+        "name": "REPRESENTANTE_LEGAL",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "NÚMERO DO CPF DO REPRESENTANTE LEGAL"
+    },
+    {
+        "name": "QUALIFICACAO_REPRESENTANTE_LEGAL",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "CÓDIGO DA QUALIFICAÇÃO DO REPRESENTANTE LEGAL"
+    },
+    {
+        "name": "FAIXA_ETARIA",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "CÓDIGO CORRESPONDENTE À FAIXA ETÁRIA DO SÓCIO"
+    },
+    {
+        "name": "ORIGIN",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "ORIGEM DO REGISTRO"
+    },
+    {
+        "name": "CREATED_AT",
+        "type": "DATE",
+        "mode": "REQUIRED",
+        "description": "DATA DE CRIAÇÃO DO REGISTRO"
+    }
+]

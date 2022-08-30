@@ -1,0 +1,26 @@
+[
+    {
+        "name": "CODIGO",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "CÓDIGO DA QUALIFICAÇÃO DO SÓCIO"
+    },
+    {
+        "name": "DESCRICAO",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "NOME DA QUALIFICAÇÃO DO SÓCIO"
+    },
+    {
+        "name": "ORIGIN",
+        "type": "STRING",
+        "mode": "REQUIRED",
+        "description": "ORIGEM DO REGISTRO"
+    },
+    {
+        "name": "CREATED_AT",
+        "type": "DATE",
+        "mode": "REQUIRED",
+        "description": "DATA DE CRIAÇÃO DO REGISTRO"
+    }
+]
