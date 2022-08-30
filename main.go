@@ -43,5 +43,6 @@ func main() {
 		logrus.Infof("Downloaded %d files in %.2f minutes", files.Len(), timer)
 	} else {
 		logrus.Warnf("Downloaded %d(%d total) files with errors in %.2f minutes: %+v", len(errs), files.Len(), timer, errs)
+		os.Exit(1)
 	}
 }
