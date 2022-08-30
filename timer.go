@@ -11,6 +11,12 @@ type Timer struct {
 	Minutes float64
 }
 
+func StartTimer() Timer {
+	t := Timer{}
+	t.Start()
+	return t
+}
+
 func (t *Timer) Start() {
 	t.Ini = time.Now()
 }
@@ -23,6 +29,10 @@ func (t *Timer) Close(message, level string) {
 	}
 	if level == "DEBUG" {
 		logrus.Debugf("%s in %.2f minutes", message, t.Minutes)
+		return
+	}
+	if level == "WARN" {
+		logrus.Warnf("%s in %.2f minutes", message, t.Minutes)
 		return
 	}
 }

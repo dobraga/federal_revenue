@@ -32,8 +32,7 @@ func InitStorage() {
 
 // Upload local file to google cloud storage
 func (s *StorageHandle) Upload(file, output string) error {
-	t := Timer{}
-	t.Start()
+	t := StartTimer()
 	defer t.Close(fmt.Sprintf("Upload from '%s' to Storage '%s'", file, output), "INFO")
 
 	// Set timeout
@@ -65,8 +64,7 @@ func (s *StorageHandle) Upload(file, output string) error {
 
 // Download google cloud storage to local
 func (s *StorageHandle) Download(file, output string) error {
-	t := Timer{}
-	t.Start()
+	t := StartTimer()
 	defer t.Close(fmt.Sprintf("Downloaded from Storage '%s' to '%s'", file, output), "INFO")
 
 	// Check file exists

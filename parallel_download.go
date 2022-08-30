@@ -65,7 +65,7 @@ func retry_download_range(client http.Client, url, filename string, ini, end, re
 }
 
 func download_range(client http.Client, url, filename string, ini, end int) error {
-	tini := time.Now()
+	t := StartTimer()
 	filesize := end - ini + 1
 
 	// Check file exists or Create the file
@@ -103,8 +103,7 @@ func download_range(client http.Client, url, filename string, ini, end int) erro
 		return err
 	}
 
-	timer := time.Since(tini).Minutes()
-	log.Debugf("Downloaded part '%s' in %.2f minutes", filename, timer)
+	t.Close(fmt.Sprintf("Downloaded part '%s'", filename), "DEBUG")
 	return nil
 }
 

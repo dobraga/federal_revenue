@@ -1,10 +1,8 @@
 package main
 
 import (
+	"fmt"
 	"os"
-	"time"
-
-	"github.com/sirupsen/logrus"
 )
 
 // Url and path
@@ -25,7 +23,7 @@ func main() {
 	InitBQ()
 	InitStorage()
 
-	tini := time.Now()
+	t := StartTimer()
 
 	err := os.MkdirAll(PATH_TEMP, 0777)
 	if err != nil {
@@ -38,11 +36,10 @@ func main() {
 	}
 
 	errs := files.Run(PATH, PATH_TEMP, GCS_PATH, CHUNK_SIZE)
-	timer := time.Since(tini).Minutes()
 	if len(errs) == 0 {
-		logrus.Infof("Downloaded %d files in %.2f minutes", files.Len(), timer)
+		t.Close(fmt.Sprintf("Downloaded %d files", files.Len()), "INFO")
 	} else {
-		logrus.Warnf("Downloaded %d(%d total) files with errors in %.2f minutes: %+v", len(errs), files.Len(), timer, errs)
+		t.Close(fmt.Sprintf("Downloaded %d(%d total) files with errors: %+v", len(errs), files.Len(), errs), "WARN")
 		os.Exit(1)
 	}
 }
