@@ -3,13 +3,13 @@
         "name": "CODIGO",
         "type": "STRING",
         "mode": "REQUIRED",
-        "description": "CÓDIGO DO PAÍS"
+        "description": "CÓDIGO DO MUNICÍPIO"
     },
     {
         "name": "DESCRICAO",
         "type": "STRING",
         "mode": "REQUIRED",
-        "description": "NOME DO PAÍS"
+        "description": "NOME DO MUNICÍPIO"
     },
     {
         "name": "ORIGIN",
@@ -19,7 +19,7 @@
     },
     {
         "name": "CREATED_AT",
-        "type": "DATE",
+        "type": "TIMESTAMP",
         "mode": "REQUIRED",
         "description": "DATA DE CRIAÇÃO DO REGISTRO"
     }

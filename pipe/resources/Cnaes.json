@@ -3,13 +3,13 @@
         "name": "CODIGO",
         "type": "STRING",
         "mode": "REQUIRED",
-        "description": "CÓDIGO DO MUNICÍPIO"
+        "description": "CÓDIGO DA ATIVIDADE ECONÔMICA"
     },
     {
         "name": "DESCRICAO",
         "type": "STRING",
         "mode": "REQUIRED",
-        "description": "NOME DO MUNICÍPIO"
+        "description": "NOME DA ATIVIDADE ECONÔMICA"
     },
     {
         "name": "ORIGIN",
@@ -19,7 +19,7 @@
     },
     {
         "name": "CREATED_AT",
-        "type": "DATE",
+        "type": "TIMESTAMP",
         "mode": "REQUIRED",
         "description": "DATA DE CRIAÇÃO DO REGISTRO"
     }

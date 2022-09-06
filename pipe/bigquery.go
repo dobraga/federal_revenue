@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"time"
 
 	"cloud.google.com/go/bigquery"
 	"github.com/sirupsen/logrus"
@@ -17,39 +16,22 @@ type BigQueryHandle struct {
 	dataset *bigquery.Dataset
 }
 
-type partition struct {
-	CREATED_AT time.Time
-}
-
-// Check lasted partition
-func (bq *BigQueryHandle) LastPartition(tablename, origin string) (time.Time, error) {
+// Run a query
+func (bq *BigQueryHandle) Run(query string) (*bigquery.RowIterator, error) {
 	ctx := context.Background()
 
-	q := bq.cli.Query(fmt.Sprintf(`
-		SELECT CAST(MAX(CREATED_AT) AS TIMESTAMP) AS CREATED_AT
-		  FROM %s.%s.%s
-		 WHERE DATE(CREATED_AT) >= DATE_SUB(CURRENT_DATE(), INTERVAL 3 MONTH)
-		   AND ORIGIN = "%s"
-	`, os.Getenv("PROJECT_ID"), os.Getenv("DATASET_NAME"), tablename, origin))
-	it, err := q.Read(ctx)
+	q := bq.cli.Query(query)
+	j, err := q.Run(ctx)
 	if err != nil {
-		return time.Time{}, fmt.Errorf("error getting last partition from %s: %v", tablename, err)
+		return &bigquery.RowIterator{}, err
 	}
 
-	for {
-		var row partition
-		err := it.Next(&row)
-		if err == nil {
-			return row.CREATED_AT, nil
-		} else {
-			return time.Time{}, nil
-		}
+	_, err = j.Wait(ctx)
+	if err != nil {
+		return &bigquery.RowIterator{}, err
 	}
-}
 
-// Add new partition
-func (bq *BigQueryHandle) NewPartition(origin string, updated_at time.Time) {
-
+	return j.Read(ctx)
 }
 
 // Upload local csv

@@ -62,17 +62,11 @@ func (f *File) Run(chunk_size int) error {
 	timer := StartTimer()
 	defer func(e error) { timer.Close("Processing '%s'", "INFO", err, f.Url) }(err)
 
-	t := Table{f.Type}
-	err = t.Create()
+	updated, err := IsUpdated(f.Filename, f.UpdatedAt)
 	if err != nil {
 		return err
 	}
-
-	last_partition, err := BQ.LastPartition(f.Type, f.Filename)
-	if err != nil {
-		return err
-	}
-	if last_partition.Year() > 1 && f.UpdatedAt.After(last_partition) {
+	if updated {
 		logrus.Infof("'%s' already processed in bigquery", f.Url)
 		return nil
 	}
@@ -117,6 +111,8 @@ func (f *File) Run(chunk_size int) error {
 	// Unzip
 	err = f.Extract()
 	if err != nil {
+		Storage.Remove(f.BucketOutput)
+		Storage.Remove(f.LocalOutput)
 		return err
 	}
 	defer os.Remove(f.LocalUnziped)
@@ -132,12 +128,13 @@ func (f *File) Run(chunk_size int) error {
 	}
 
 	err = BQ.UploadLocalData(f.ProcessedOutput, f.Type)
-	if err == nil {
-		os.Remove(f.ProcessedOutput)
-		os.Remove(f.LocalOutput)
+	if err != nil {
+		return err
 	}
 
-	return err
+	os.Remove(f.ProcessedOutput)
+	os.Remove(f.LocalOutput)
+	return SetLastUpdate(f.Filename, f.UpdatedAt)
 }
 
 // Download to local file
@@ -223,7 +220,7 @@ func (f *File) AddFields() error {
 	timer := StartTimer()
 	defer func(e error) { timer.Close("Add fields to '%s'", "DEBUG", err, f.Filename) }(err)
 
-	command := fmt.Sprintf("sed s/$/';\"%s\";\"%s\"'/ '%s' > '%s'", f.Filename, f.UpdatedAt.Format("2006-01-02"), f.LocalUnziped, f.ProcessedOutput)
+	command := fmt.Sprintf("sed s/$/';\"%s\";\"%s\"'/ '%s' > '%s'", f.Filename, f.UpdatedAt.Format("2006-01-02 15:04:05"), f.LocalUnziped, f.ProcessedOutput)
 
 	cmd := exec.Command("bash", "-c", command)
 	cmd.Start()

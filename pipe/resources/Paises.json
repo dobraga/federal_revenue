@@ -3,13 +3,13 @@
         "name": "CODIGO",
         "type": "STRING",
         "mode": "REQUIRED",
-        "description": "CÓDIGO DA ATIVIDADE ECONÔMICA"
+        "description": "CÓDIGO DO PAÍS"
     },
     {
         "name": "DESCRICAO",
         "type": "STRING",
         "mode": "REQUIRED",
-        "description": "NOME DA ATIVIDADE ECONÔMICA"
+        "description": "NOME DO PAÍS"
     },
     {
         "name": "ORIGIN",
@@ -19,7 +19,7 @@
     },
     {
         "name": "CREATED_AT",
-        "type": "DATE",
+        "type": "TIMESTAMP",
         "mode": "REQUIRED",
         "description": "DATA DE CRIAÇÃO DO REGISTRO"
     }

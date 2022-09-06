@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"time"
 
 	"cloud.google.com/go/storage"
 	"github.com/sirupsen/logrus"
@@ -38,12 +37,8 @@ func (s *StorageHandle) Upload(file, output string) error {
 		timer.Close("Upload from '%s' to Storage '%s'", "INFO", err, file, output)
 	}(err)
 
-	// Set timeout
-	ctx := context.Background()
-	ctx, cancel := context.WithTimeout(ctx, time.Minute*5)
-	defer cancel()
-
 	// Upload an object with storage.Writer
+	ctx := context.Background()
 	wc := s.storage.Object(output).NewWriter(ctx)
 	defer wc.Close()
 
@@ -81,12 +76,8 @@ func (s *StorageHandle) Download(file, output string) error {
 		return err
 	}
 
-	// Set timeout
-	ctx := context.Background()
-	ctx, cancel := context.WithTimeout(ctx, time.Minute*5)
-	defer cancel()
-
 	// Reader
+	ctx := context.Background()
 	rc, err := s.storage.Object(file).NewReader(ctx)
 	if err != nil {
 		err = fmt.Errorf("error downloading from Storage '%s' to '%s': %v", file, output, err)

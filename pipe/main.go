@@ -1,8 +1,6 @@
 package main
 
-import (
-	"os"
-)
+import "os"
 
 // Url and path
 const URL = "http://200.152.38.155/CNPJ/"
@@ -11,7 +9,7 @@ const PATH_TEMP = "data/temp"
 const GCS_PATH = ""
 
 // Download the partitions
-const MAX_GOROUTINES = 500
+const MAX_GOROUTINES = 250
 const CHUNK_SIZE = 10_000_000 // 10mb
 
 // Retry configuration

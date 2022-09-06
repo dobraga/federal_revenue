@@ -49,7 +49,7 @@
     },
     {
         "name": "CREATED_AT",
-        "type": "DATE",
+        "type": "TIMESTAMP",
         "mode": "REQUIRED",
         "description": "DATA DE CRIAÇÃO DO REGISTRO"
     }
